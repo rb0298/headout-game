@@ -1,0 +1,42 @@
+[
+  {
+    "alias": "dst1",
+    "name": "Paris",
+    "clues": ["Home to a famous tower finished in 1889", "Called the City of Light"],
+    "funFacts": ["The Louvre is the world's largest art museum.", "Famous for café culture and haute cuisine."]
+  },
+  {
+    "alias": "dst2",
+    "name": "Tokyo",
+    "clues": ["Capital city with over 13 million residents", "Known for high-tech, anime, and cherry blossoms"],
+    "funFacts": [
+      "It's the most populous metropolitan area in the world.",
+      "Tsukiji once was the world's largest fish market."
+    ]
+  },
+  {
+    "alias": "dst3",
+    "name": "New York City",
+    "clues": ["Home to a famous statue gifted by France", "Known as the Big Apple"],
+    "funFacts": ["More than 800 languages are spoken in this city.", "The subway system has 472 stations."]
+  },
+  {
+    "alias": "dst4",
+    "name": "Rome",
+    "clues": ["City built on seven hills", "Home to an ancient amphitheater completed in 80 AD"],
+    "funFacts": [
+      "People throw about €1.5 million into the Trevi Fountain each year.",
+      "It's home to the smallest country in the world."
+    ]
+  },
+  {
+    "alias": "dst5",
+    "name": "Sydney",
+    "clues": ["Famous for its sail-shaped opera house", "Largest city in Australia"],
+    "funFacts": [
+      "The Sydney Harbour Bridge is the world's largest steel arch bridge.",
+      "Bondi Beach is one of the most famous beaches in the world."
+    ]
+  }
+]
+
