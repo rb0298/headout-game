@@ -7,33 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Copy, PhoneIcon as WhatsappIcon } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import html2canvas from "html2canvas"
 
 
 export function ShareDialog({ open, onOpenChange, username }) {
   const { toast } = useToast()
   const [shareUrl, setShareUrl] = useState("")
-  const [shareImage, setShareImage] = useState(null)
-  const shareCardRef = useRef(null)
-
-  const generateShareImage = async () => {
-    console.log('shareImage')
-    if (!shareCardRef.current) return
-
-    try {
-      const canvas = await html2canvas(shareCardRef.current, {
-        backgroundColor: null,
-        scale: 2,
-      })
-
-      console.log(canvas, 'canvas');
-
-      // const imageUrl = canvas.toDataURL("image/png")
-      // setShareImage(imageUrl)
-    } catch (error) {
-      console.error("Error generating share image:", error)
-    }
-  };
 
   useEffect(() => {
     if (open && username) {
@@ -41,12 +19,8 @@ export function ShareDialog({ open, onOpenChange, username }) {
       const baseUrl = window.location.origin
       const url = `${baseUrl}/play?invitedBy=${encodeURIComponent(username)}`
       setShareUrl(url)
-
-      // Generate share image
-      console.log('test')
-      generateShareImage()
     }
-  }, [open, username, generateShareImage])
+  }, [open, username])
 
 
 
@@ -74,7 +48,6 @@ export function ShareDialog({ open, onOpenChange, username }) {
 
         <div className="flex justify-center my-4">
           <div
-            ref={shareCardRef}
             className="bg-gradient-to-br from-primary/20 to-primary/10 p-6 rounded-lg text-center w-full max-w-xs"
           >
             <h3 className="text-xl font-bold mb-2">Globetrotter Challenge!</h3>

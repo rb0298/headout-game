@@ -12,9 +12,11 @@ function getRandomDestinations(exclude, count) {
 export async function GET() {
     try {
         // Get a random destination
-        const allDestinations = destinations
+        const allDestinations = destinations;
+        console.log(allDestinations, 'allDestinations')
         const randomIndex = Math.floor(Math.random() * allDestinations.length)
         const destination = allDestinations[randomIndex]
+        console.log(destination, 'destination')
 
         // Get 3 random wrong options
         const wrongOptions = getRandomDestinations(destination.alias, 3)

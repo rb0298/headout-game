@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,7 @@ export default function Register() {
   const router = useRouter()
   const { toast } = useToast()
   const [username, setUsername] = useState("")
+  const [userImage, setUserImage] = useState("");
   const [isRegistered, setIsRegistered] = useState(false)
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)

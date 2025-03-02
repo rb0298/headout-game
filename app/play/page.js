@@ -71,7 +71,8 @@ export default function PlayGame() {
         setGameState((prev) => ({ ...prev, loading: true }))
 
         try {
-            const response = await fetch("/api/destinations/random")
+            const response = await fetch("/api/destinations/random");
+            console.log(response, 'response');
             if (response.ok) {
                 const data = await response.json()
                 console.log(data, 'destinationdata')
