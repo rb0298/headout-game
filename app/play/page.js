@@ -6,15 +6,17 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, Check, X, RefreshCw, Trophy, MapPin, Plane } from "lucide-react"
+import { ArrowRight, Check, X, RefreshCw, Trophy, MapPin, Plane, Home } from "lucide-react"
 import confetti from "canvas-confetti"
 import { useToast } from "@/components/ui/use-toast"
+
+const MAX_INCORRECT = 3;
 
 export default function PlayGame() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const invitedBy = searchParams.get("invitedBy")
-    const { toast } = useToast()
+    const { toast } = useToast();
 
     const [gameState, setGameState] = useState({
         currentDestination: null,
@@ -24,35 +26,39 @@ export default function PlayGame() {
         isCorrect: false,
         score: { correct: 0, incorrect: 0 },
         loading: true,
-        inviterScore: null,
+        winningScore: 10,
+        isChallenged: false,
+        gameOver: false,
+        isWinner: false,
     })
 
     useEffect(() => {
         if (invitedBy) {
+            const fetchInviterScore = async (username) => {
+                try {
+                    const response = await fetch(`/api/users/${username}`)
+                    if (response.ok) {
+                        const data = await response.json()
+                        setGameState((prev) => ({
+                            ...prev,
+                            winningScore: data.score,
+                            isChallenged: true,
+                        }))
+
+                        toast({
+                            title: `Playing ${username}'s challenge!`,
+                            description: `They have a score of ${data.score.correct} correct answers. Can you beat it?`,
+                        })
+                    }
+                } catch (error) {
+                    console.error("Error fetching inviter score:", error)
+                }
+            }
             fetchInviterScore(invitedBy)
         }
         loadNewDestination()
     }, [invitedBy])
 
-    const fetchInviterScore = async () => {
-        try {
-            const response = await fetch(`/api/users/${username}`)
-            if (response.ok) {
-                const data = await response.json()
-                setGameState((prev) => ({
-                    ...prev,
-                    inviterScore: data.score,
-                }))
-
-                toast({
-                    title: `Playing ${username}'s challenge!`,
-                    description: `They have a score of ${data.score.correct} correct answers. Can you beat it?`,
-                })
-            }
-        } catch (error) {
-            console.error("Error fetching inviter score:", error)
-        }
-    }
 
     const getOptionStyle = (option) => {
         if (gameState.answered) {
@@ -72,10 +78,8 @@ export default function PlayGame() {
 
         try {
             const response = await fetch("/api/destinations/random");
-            console.log(response, 'response');
             if (response.ok) {
                 const data = await response.json()
-                console.log(data, 'destinationdata')
 
                 setGameState((prev) => ({
                     ...prev,
@@ -104,22 +108,35 @@ export default function PlayGame() {
         if (gameState.answered) return
 
         const isCorrect = option.alias === gameState.currentDestination?.alias
+        const newScore = {
+            correct: isCorrect ? gameState.score.correct + 1 : gameState.score.correct,
+            incorrect: !isCorrect ? gameState.score.incorrect + 1 : gameState.score.incorrect,
+        }
+        const isWinner = newScore.correct === gameState.winningScore;
+        const isGameOver = isWinner || newScore.incorrect >= MAX_INCORRECT;
 
         setGameState((prev) => ({
             ...prev,
             selectedOption: option,
             answered: true,
             isCorrect,
-            score: {
-                correct: isCorrect ? prev.score.correct + 1 : prev.score.correct,
-                incorrect: !isCorrect ? prev.score.incorrect + 1 : prev.score.incorrect,
-            },
+            score: newScore,
+            gameOver: isGameOver,
+            isWinner,
         }))
 
         if (isCorrect) {
             confetti({
                 particleCount: 100,
                 spread: 70,
+                origin: { y: 0.6 },
+            })
+        }
+
+        if (isWinner) {
+            confetti({
+                particleCount: 200,
+                spread: 160,
                 origin: { y: 0.6 },
             })
         }
@@ -135,8 +152,6 @@ export default function PlayGame() {
         }
     }
 
-
-
     const handleNextDestination = () => {
         loadNewDestination()
     }
@@ -147,6 +162,52 @@ export default function PlayGame() {
                 <div className="animate-bounce">
                     <Plane className="h-16 w-16 text-blue-500" />
                 </div>
+            </div>
+        )
+    }
+
+    if (gameState.gameOver) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100 py-8 px-4 flex items-center justify-center">
+                <Card className="w-full max-w-md bg-white bg-opacity-90 shadow-xl">
+                    <CardHeader>
+                        <CardTitle className="text-3xl text-center">
+                            {gameState.isWinner ? `Congratulations!` : "Game Over"}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-center">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                        >
+                            {gameState.isWinner ? (
+                                <Trophy className="w-24 h-24 text-yellow-500 mx-auto mb-4" />
+                            ) : (
+                                <MapPin className="w-24 h-24 text-blue-500 mx-auto mb-4" />
+                            )}
+                        </motion.div>
+                        <p className="text-xl mb-4">
+                            {gameState.isWinner ? "You've won the game!" : "You've reached the maximum number of incorrect guesses."}
+                        </p>
+                        <p className="text-2xl font-bold mb-2">Your Final Score:</p>
+                        <div className="flex justify-center space-x-4 mb-4">
+                            <Badge variant="secondary" className="text-green-600 text-lg p-2">
+                                <Check className="mr-1 h-5 w-5" /> {gameState.score.correct}
+                            </Badge>
+                            <Badge variant="secondary" className="text-red-600 text-lg p-2">
+                                <X className="mr-1 h-5 w-5" /> {gameState.score.incorrect}
+                            </Badge>
+                        </div>
+                        <p className="text-xl">Total Points: {gameState.score.correct}</p>
+                    </CardContent>
+                    <CardFooter>
+                        <Button onClick={() => router.push("/")} className="w-full text-lg">
+                            <Home className="mr-2 h-5 w-5" />
+                            Back to Home
+                        </Button>
+                    </CardFooter>
+                </Card>
             </div>
         )
     }
@@ -293,4 +354,3 @@ export default function PlayGame() {
         </div>
     )
 }
-
